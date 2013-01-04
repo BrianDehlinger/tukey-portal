@@ -1,0 +1,205 @@
+{% extends "base_web.html" %}
+
+{% block meta_title %}Contact Support{% endblock %}
+
+{% block header %}
+<header class="jumbotron subhead">
+  <h1>OSDC Documentation and Support</h1>
+<p>
+  Below are instructions for using the OSDC. Please contact our support team if you have any further questions. 
+</p>
+
+</div>
+</header>
+{% endblock %}
+
+
+{% block main %}
+<div class="container">
+<div class="accordion" id="accordion2">
+<div class="accordion-group">
+<div class="accordion-heading">
+<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+Contact the OSDC Support Team
+</a>
+</div>
+<div id="collapseOne" class="accordion-body collapse">
+<div class="accordion-inner">
+  <form action="/support/" method="post" class="form-horizontal">{% csrf_token %}
+  <fieldset>    
+    <div class="control-group {% if form.sender.errors %}error{% endif %}">  
+      <label class="control-label" for="id_sender">Your Email</label>
+      <div class="controls">
+  <input type="text" class="input-xlarge" id="id_sender" name="sender">
+  <span class="help-inline">{{form.sender.errors}}</span>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="id_subject">Subject</label>
+      <div class="controls">
+  <input type="text" class="input-xlarge" id="id_subject" name="subject">
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="id_message">Message</label>
+      <div class="controls">
+  {{ form.message }}
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="controls">
+      <button type="submit" class="btn btn-primary">Send Message</button>
+      </div>
+      </div>
+      
+  </fieldset>
+</form>
+</div>
+</div>
+</div>
+</div>
+
+<p><h3>Open Science Data Cloud &#8220;Big Picture&#8221; Diagram of the OSDC infrastructure:</h3></p>
+<p>The Open Science Data Cloud is currently composed of Adler, a cloud based on Eucalyptus and Sullivan, a cloud based on OpenStack.</p>
+<p><code>Internet (users)</code><br />
+|<br />
+<code>ssh -A login1.opensciencedatacloud.org</code> (Adler) or <br />
+<code>ssh -A login2.opensciencedatacloud.org</code> (Sullivan)<br />
+|<br />
+<code>Open Science Data Cloud (VMs) --&gt;-- NAT --&gt;-- Internet</code><br />
+|<br />
+<code>GlusterFs/CIFS (shared filesystem)</code></p>
+<p><h3>Workflow:</h3></p>
+<ol>
+<li>ssh to the login server</li>
+<li>start a VM</li>
+<li>ssh to VM</li>
+<li>mount shared filesystem with own credentials</li>
+<li>&#8230;compute!&#8230;</li>
+<li>when all done, stop your VM</li>
+</ol>
+<p><h3>Requesting Open Science Data Cloud account:</h3><br />
+To request an account on the OSDC, please visit the <a href="/apply/">Account Application page</a> and provide the necessary information.</p>
+<p><h3>Open Science Data Cloud monthly maintenance:</h3><br />
+Monthly maintenance will take place on the last Tuesday of each month at 0900CT. Please make sure to save your work and shutdown all instances by that time. A reminder will be sent each month.</p>
+<p><h3>Open Science Data Cloud basic usage:</h3></p>
+<p>In your home directory on the login server (login1.opensciencedatacloud.org), there is a .euca subdirectory containing your EC2 (eucalyptus) credentials. This directory has mode 700 as it contains cryptographic keys for accessing EC2. Keep it protected.</p>
+<p>To list images, run:</p>
+<ul><code>euca-describe-images</code></ul>
+<p>Look for entries with an ID starting with &#8216;emi-*&#8217; or &#8216;ami-*&#8217;.  OSDC-provided prototypical images are owned by admin and start with &#8216;prototypical-&#8217;.</p>
+<p>Following types of VMs are supported:</p>
+<div class="row">
+<div class="span4">
+<table class="table table-bordered">
+  <tr>
+    <th>VM Type</th>
+    <th>Cores</th>
+    <th>Ram (MB)</th>
+    <th>Disk (GB)</th>
+  </tr>
+  <tr>
+    <td>m1.small</td>
+    <td>1</td>
+    <td>3584</td>
+    <td>20</td>
+  </tr>
+  <tr>
+    <td>m1.large</td>
+    <td>2</td>
+    <td>7168</td>
+    <td>20</td>
+  </tr>
+  <tr>
+    <td>c1.medium</td>
+    <td>4</td>
+    <td>14336</td>
+    <td>20</td>
+  </tr>
+  <tr>
+    <td>m1.xlarge</td>
+    <td>8</td>
+    <td>28672</td>
+    <td>20</td>
+  </tr>
+  <tr>
+    <td>c1.xlarge</td>
+    <td>8</td>
+    <td>28672</td>
+    <td>20</td>
+  </tr>
+</table>
+</div>
+</div>
+<p>To check the cloud availability/usage on the Adler cloud:</p>
+<ul><code>euca-cloud-status</code></ul>
+<p>To start an instance on Adler run:</p>
+<ul><code>euca-run-instances -k USERNAME -n 1 -t m1.small emi-ID</code></ul>
+<p>To start an instance on Sullivan run:</p>
+<ul><code>euca-run-instances -k USERNAME -n 1 -t m1.small -f ~/.smbpasswd.sh emi-ID</code></ul>
+<p>This will start an <code>m1.small</code> instance as defined by the command above.  Note  that it is best to start one instance at a time. That is, if one needs 20  instances, they should be started one-at-a-time followed by a delay and then  the next instance, until all 20 are running. This effectively resolves Eucalyptus software scalability issues.</p>
+<p>To monitor/list instances of one&#8217;s group (only!), run:</p>
+<ul><code>euca-describe-instances</code></ul>
+<p>This will return status of instances, with instance ID and an instance IP address.</p>
+<p>To login to an instance on Adler run:</p>
+<ul><code>ssh root@INSTANCE_IP</code></ul>
+<p>To login to an instance on Sullivan run:</p>
+<ul><code>ssh ubuntu@INSTANCE_IP</code></ul>
+<p>To mount shared filesystem on Adler instances, run following command upon logging in:</p>
+<ul><code>/cloudconf/mount-glusterfs USERNAME</code></ul>
+<p>and enter your password.</p>
+<p>For Sullivan instances the option <code>-f ~/smbpasswd.sh</code> ensures the shared
+filesystem is automatically mounted.</p>
+<p>To check output log of an instance, run:</p>
+<ul><code>euca-get-console-output INSTANCE_ID</code></ul>
+<p>To stop an instance, log out of the instance and run this command:</p>
+<ul><code>euca-terminate-instances INSTANCE_ID</code></ul>
+<p><h3>Open Science Data Cloud image features:</h3></p>
+Package installation:<br />
+OSDC Adler images are based on GNU/Debian 5.0 &#8216;Lenny&#8217; amd64 Linux distribution.  These images are pre configured to use our lab repository Debian cache  service.&nbsp;</p>
+<p>OSDC Sullivan images are based on UEC cloud images with Ubuntu 12.04 &#8216;Precise&#8217;.</p>
+<p>To find package names, run:</p>
+<p><code>apt-cache search KEYWORD1 KEYWORKD2 ...</code></p>
+<p>To examine package info, run:</p>
+<p><code>aptitude show PACKAGENAME</code></p>
+<p>To install a package, run:</p>
+<p><code>aptitude install -PV PACKAGE-NAME1 PACKAGE-NAME2</code></p>
+
+<p><h3>Creating Open Science Data Cloud images from an Adler instance:</h3></p>
+<p>These instructions only apply to the Adler cloud. Please see below for Sullivan instructions</p>
+<ul><code>/cloudconf/mkimage-wrapper</code></ul>
+<p><h3>IMPORTANT!!!</h3>  Make sure to use a unique image filename _every_ time.</p>
+<p>Copy your .euca/ directory from the login1.opensciencedatacloud.org server to the instance.  On the login server run:</p>
+<ul><code>rsync -avu .euca root@INSTANCE_IP: </code> (*Important: include the colon)</ul>
+<p>Source euca env (inside running VM):</p>
+<ul><code>source ~/.euca/eucarc</code></ul>
+<p>Bundle the image:</p>
+<ul><code>euca-bundle-image -d /scratch/ -i /scratch/"new-unique-name-DATE-ENUM"</code></ul>
+<p>Upload the bundle:</p>
+<ul><code>euca-upload-bundle -b BUCKET_NAME -m /scratch/"new-unique-name-DATE-ENUM".manifest.xml</code></ul>
+<p>Register the image:</p>
+<ul><code>euca-register BUCKET_NAME/"new-unique-name-DATE-ENUM".manifest.xml</code></ul>
+<p>Check if available:</p>
+<ul><code>euca-describe-images</code></ul>
+<p>Make sure to make a copy your <code>MY-UPDATED-VM.img.manifest.xml</code> file to the login1.opensciencedatacloud.org server, in order to easily remove an image at a later time.  On the login server run:</p>
+<ul><code>rsync -avu root@INSTANCE_IP:/scratch/"new-unique-name-DATE-ENUM".manifest.xml .</code></ul>
+<p>To remove images (at a later time):</p>
+<ul><code>euca-deregister emi-ID</code><br />
+<code>euca-delete-bundle -b BUCKET_NAME -m ./"new-unique-name-DATE-ENUM".manifest.xml</code></ul>
+<h3>Creating Open Science Data Cloud images from a Sullivan instance:</h3><br />
+These instructions only apply to the Sullivan cloud. Please see above for Adler instructions</p>
+<p>Use the nova client to find the instance ID:</p>
+<ul><code>nova list</code></ul>
+<p>Then create the image:</p>
+<ul><code>nova image-create INSTANCE_ID new-unique-name-DATE-ENUM</code></ul>
+<p>By default these images are private and can only be seen by you.  To make images public:</p>
+<ul><code>glance update INSTANCE_ID is_public=true</code></ul>
+
+</div>
+{% endblock %}
+
+{% block js %}
+{% include "horizon/_scripts.html" %}
+<script type="text/javascript">
+$("#nav-support").attr('class', 'active')
+</script>
+{% endblock %}

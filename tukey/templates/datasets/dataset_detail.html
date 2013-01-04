@@ -1,0 +1,120 @@
+{% extends "base_web.html" %}
+
+{% block meta_title %}Public Data Sets{% endblock %}
+
+{% block header %}
+<header class="jumbotron subhead">
+  <h1>{{dataset.title}}</h1>
+ 
+<div class="span12 data-lead">
+{{dataset.description|safe}}
+</div>
+</header>
+{% endblock %}
+
+{% load tz %}
+
+{% block main %}
+
+<div class="span12 data-label"><strong>Source: </strong>
+{% if dataset.source_url %}
+<a href="{{dataset.source}}">
+{{dataset.source_url}}
+</a>
+{% endif %}
+</div>
+
+<div class="span12 data-label"><strong>Categories: </strong>
+  {% for category in dataset.categories %}
+  <a href="/publicdata/category/{{ category }}">{{ category }}</a>{% if forloop.last %}{% else %}, {% endif %}
+  {% endfor %}
+</div>
+
+<div class="span12 data-label"><strong>Size: </strong> {{dataset.size}}</div>
+
+<div class="span12 data-label"><strong>Last Updated: </strong>{% timezone "UTC" %} {{dataset.last_update}} {% endtimezone %}UTC </div>
+
+
+<div class="span12 data-header"><h3>Download Instructions</h3></div>
+<div class="span12">
+<p>
+All public data sets are available on both commodity internet connections and high speed <a href="http://www.startap.net/starlight/">StarLight</a>/<a href="http://www.internet2.edu/">Internet2</a> connections. We recommend using <a href="http://rsync.samba.org/">rsync</a> or UDR to download the data. UDR is a program that enables rsync over UDT and can greatly improve download speeds, especially over high speed networks. UDR is open source and available on github.
+
+{% if dataset.osdc_location %}
+<p>
+<h4>List the contents of {{dataset.title}}:</h4>
+<ul>
+<li>
+Commodity internet connection: <code> rsync {{dataset.osdc_location}}::{{dataset.osdc_folder}} </code>
+</li>
+{% if dataset.osdc_hs_location %}
+<li>
+High speed connection:
+<code> rsync {{dataset.osdc_hs_location}}::{{dataset.osdc_hs_folder}} </code>
+</li>
+{% endif %}
+</ul>
+
+<h4>Download/synchronize {{dataset.title}}:</h4>
+<ul>
+<li>
+Commodity internet connection: <code> rsync -avzu {{dataset.osdc_location}}::{{dataset.osdc_folder}} /path/to/local_copy</code>
+</li>
+{% if dataset.osdc_hs_location %}
+<li>
+High speed connection:
+<code> rsync {{dataset.osdc_hs_location}}::{{dataset.osdc_hs_folder}} -avu /path/to/local_copy</code>
+</li>
+{% endif %}
+</ul>
+
+<h4>Download an individual file from {{dataset.title}}:</h4>
+<ul>
+<li>
+Commodity internet connection: <code> rsync -avzu {{dataset.osdc_location}}::{{dataset.osdc_folder}}/path/to/remotefile /path/to/local_copy</code>
+</li>
+{% if dataset.osdc_hs_location %}
+<li>
+High speed connection:
+<code> rsync -avu {{dataset.osdc_hs_location}}{{dataset.osdc_hs_folder}}/path/to/remote/file /path/to/local_copy</code>
+</li>
+{% endif %}
+</ul>
+</p>
+{% else %}
+<p>
+Further download instructions for {{dataset.title}} will be posted here shortly.
+</p>
+{% endif %}
+</div>
+<div class="span12 data-header"><h3>OSDC Instructions</h3></div>
+<div class="span12">
+<p>
+Virtual machines on the OSDC have direct access to all of the public data sets. If you do not have a OSDC account, you can apply for one <a href="http://www.opensciencedatacloud.org/apply/">here</a>. 
+<p>
+<h4>Adler or Sullivan:</h4>
+</p>
+To mount the public data sets on a VM, you need to have the <code>cifs-utils</code> package installed. 
+</p>
+<p>
+Then you can run <code> mount -tcifs -oguest 10.103.112.253:/osdc_datasets /mnt/point/</code> and all of the datasets will be located in /mnt/point/.
+</p>
+<p>
+<h4>OCC-Y: </h4>
+</p>
+<p>
+The public data sets are mounted on the namenode in <code>/mnt/pubdata</code>.
+</p>
+</div>
+<div class="span12 data-header"><h3>License/Attribution Requirements</h3></div>
+<div class="span12">
+</div>
+
+{% endblock %}
+
+{% block js %}
+{% include "horizon/_scripts.html" %}
+<script type="text/javascript">
+$("#nav-publicdata").attr('class', 'active')
+</script> 
+{% endblock %}

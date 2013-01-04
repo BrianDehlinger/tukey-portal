@@ -1,0 +1,48 @@
+{% extends "horizon/common/_modal_form.html" %}
+{% load i18n %}
+
+{% comment %}
+{% block modal-header %}{% trans "Log In" %}{% endblock %}
+{% endcomment %}
+{% block modal_class %}login {% if hide %}modal hide{% endif %}{% endblock %}
+
+
+{% block form_action %}{% url login %}{% endblock %}
+
+
+{% block modal-body %}
+    <div>
+      <a href="/Shibboleth.sso/Login?target={% url horizon:nova:overview:index %}">
+         {% trans "Sign in with " %}
+         <img src="../../static/dashboard/img/shibboleth.jpg" alt="Shibboleth"/>
+      </a>
+    {% if request.GET.shib %}
+	<br />
+	{% trans "To sign out of your Shibboleth ID provider please close all open browser windows." %}
+    {% endif %}
+    </div>
+
+    <br />
+
+    <div>
+      {% if next %}<a href="{% url openid:openid-login %}?next={{ next }}">
+      {% else %}<a href="{% url openid:openid-login %}?next={% url horizon:nova:overview:index %}">
+      {% endif %}
+         {% trans "Sign in with " %}
+	<img src="../../static/dashboard/img/openid.png" alt="OpenID"/>
+      </a>
+    </div>
+
+  <!--
+  <fieldset>
+    {% if next %}<input type="hidden" name="{{ redirect_field_name }}" value="{{ next }}" />{% endif %}
+    {% include "horizon/common/_form_fields.html" %}
+  </fieldset>
+  -->
+{% endblock %}
+
+{% block modal-footer %}
+<!--
+  <button type="submit" class="btn btn-primary pull-right">{% trans "Sign In" %}</button>
+-->
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base_web.html" %}
+
+{% load i18n %}
+
+{% block meta_title %}{% trans "Projects" %}{% endblock %}
+
+{% block header %}
+<header class="jumbotron subhead">
+  <h1>OSDC Projects</h1>
+</header>
+{% endblock %}
+
+{% block main %}
+
+<h3>Partnership for International Research & Education Fellowship Opportunity</h3>
+<div class="span12">
+<p>
+The Open Science Data Cloud (OSDC) PIRE Program provides U.S. graduate students, post doctoral scientists, and early career scientists with fellowships so that they can work with OSDC PIRE partners in a variety of countries around the world on big data science.
+</p> 
+
+<p>
+The OSDC has PIRE Partners in a number of countries, including the United Kingdom, Brazil, the Netherlands, Japan, Korea and China.  The OSDC PIRE program is hosted by the University of Chicago, Florida International University, and the University of Illinois at Chicago.  The OSDC PIRE program is supported in part by a five-year grant from the National Science Foundation.  The OSDC is managed by the not-for-profit Open Cloud Consortium and is one of the largest science clouds that support researchers.
+</p>
+
+<p>
+If you are a US Citizen or permanent resident and are interested in this unique opportunity, please contact info@opensciencedatacloud.org
+</p>
+</div>
+<h3>Bookworm (Digital Humanities)</h3>
+<div class="span12">
+<p>
+OSDC supports Bookworm from Harvard's Cultural Observatory and offers a way to interact with digitized book content and full text search. Bookworm uses ngrams extracted from books in the public domain and integrates library metadata, including genre, author information, publication place and date. See <a href="arxiv.culturomics.org">arxiv.culturomics.org</a>. Erez Liberman Aiden, the Director of the Harvard Cultural Observatory, is the digital humanities representative to the OSDC Users Group.
+</p>
+</div>
+
+<h3>Bionimbus (Biological Data)</h3>
+<div class="span12">
+<p>
+Bionimbus is a cloud-based system for managing, analyzing and sharing genomic data, including data from next-generation sequencing devices. Bionimbus also contains many of the public datasets from the NIH NCBI. Bionimbus has been used by members of the NIH-funded modENCODE Consortium to analyze data produced by the project. Bionimbus is currently running on two of the OSDC racks.  As more hardware becomes available, Bionimbus OSDC resources will be made more broadly available. The Bionimbus Project is co-led by Kevin White and Robert Grossman from the Institute for Genomics and Systems Biology (IGSB) at the University of Chicago.
+</p>
+</div>
+
+<h3>modENCODE (Biological Data)</h3>
+<div class="span12">
+<p>
+The National Human Genome Research Institute (NHGRI) model organism ENCyclopedia Of DNA Elements (modENCODE) Project will try to identify all of the sequence-based functional elements in the Caenorhabditis elegans and Drosophila melanogaster genomes. OCSD is hosting a mirror of all the public modENCODE data available from the modENCODE Data Coordination Center.
+</p>
+<p>
+The modENCODE project is described in <a href="http://dx.doi.org/10.1038/459927a">Unlocking the Secrets of the Genome, Nature 2009 Jun 18;459(7249):927-30</a>.
+</p>
+</div>
+
+<h3>Project Matsu (Earth Science Data)</h3>
+<div class="span12">
+<p>
+Project Matsu is a collaboration with NASA. The OSDC is used to process Earth Observing 1 (EO-1) satellite imagery from the Advanced Land Imager and the Hyperion instruments and to make this data available to interested users. We are currently working on developing services for detecting fires and floods and getting relevant information to first responders.
+</p>
+</div>
+
+<h3>The OSDC Data Challenge</h3>
+<div class="span12">
+<p>
+With five year funding from a recent NSF grant that will support the training of U.S. graduate students in data intensive science, we will run a contest each year to select 1 to 3 datasets to put into the OSDC.  The datasets will be selected based on the long term interest of the data and the availability of sufficient capacity within the OSDC to handle the data. Please send datasets that you would like to see supported by the OSDC to info@opensciencedatacloud.org.
+</p>
+</div>
+
+<h3>Propose Your Own Project</h3>
+<div class="span12">
+<p>
+To get involved with the OSDC, propose your own project by contacting one of the OSDC members or by writing to info@opensciencedatacloud.org.
+</p>
+</div>
+
+{% endblock %}
+
+{% block js %}
+{% include "horizon/_scripts.html" %}
+<script type="text/javascript">
+$("#nav-projects").attr('class', 'active')
+</script>
+{% endblock %}

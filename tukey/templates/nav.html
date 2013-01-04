@@ -1,0 +1,24 @@
+{% load static %}
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <div class="nav-collapse collapse">
+        <ul class="nav">
+        {% for page in nav_pages %}
+        {% if not page.img and page.slug == curr_page %}
+        <li id="nav-{{ page.slug }}" class="active">
+        {% else %}
+        <li id="nav-{{ page.slug }}">
+        {% endif %}
+          {% if page.img %}
+          <a href="/{{ page.slug }}" id="nav-overview-a"><img src="{% get_static_prefix %}{{ page.img }}"></a>
+          {% else %}
+          <a href="/{{ page.slug }}">{{ page.nav_name }}</a>
+          {% endif %}
+        </li>
+        {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

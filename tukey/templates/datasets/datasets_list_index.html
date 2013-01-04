@@ -1,0 +1,48 @@
+{% extends "base_web.html" %}
+
+{% block meta_title %}Public Data Sets{% endblock %}
+
+{% load util_tags %}
+
+{% block header %}
+<header class="jumbotron subhead">
+  <h1>Public Data Sets</h1>
+  <div class="lead">
+    Repository for public data sets of scientific interest, hosted on the OSDC.
+    </div>
+<div class="data-lead">
+  The data sets below can downloaded over the internet or high performance networks such as Internet2, as well as computed over directly on the OSDC. Currently, the OSDC hosts about 450 TB of data and the plan is to steadily increase this to the petabyte level. If you have suggestions about data that should be included, please let us know at info@opencloudconsortium.org. More information about the OSDC can be found at <a href="http://www.opensciencedatacloud.org">www.opensciencedatacloud.org</a>.
+</div>
+</header>
+{% endblock %}
+
+{% load tz %}
+
+{% block main %}
+
+{% if category_filter %}
+<h3>Viewing data sets in category: {{ category_filter }} (<a href="{% url datasets:datasets_list_index %}">View All</a>)</h3>
+{% endif %}
+
+{% if datasets %}
+    {% for dataset in datasets %}
+      <div class="span12 data-header"><h3><a href="{% url datasets:dataset_detail dataset.ark_key %}">{{ titles|getvalue:dataset.ark_key }}</a></h3></div>
+      <div class="span12 data-entry">{{ short_descripts|getvalue:dataset.ark_key }}</div>
+      <div class="span12 data-entry">Categories: 
+	   {% for category in categories|getvalue:dataset.ark_key %}
+        <a href="{% url datasets:datasets_category category %}">{{ category }}</a>{% if forloop.last %}{% else %}, {% endif %}
+	   {% endfor %}
+      </div>
+      <div class="span12 data-faint">Last Modified: {% timezone "UTC" %} {{ modified_times|getvalue:dataset.ark_key }} {% endtimezone %}UTC </div>
+    {% endfor %}
+{% else %}
+    <p>No datasets are available.</p>
+{% endif %}
+{% endblock %}
+
+{% block js %}
+{% include "horizon/_scripts.html" %}
+<script type="text/javascript">
+$("#nav-publicdata").attr('class', 'active')
+</script> 
+{% endblock %}

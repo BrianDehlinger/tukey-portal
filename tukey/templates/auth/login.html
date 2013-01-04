@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Login" %}{% endblock %}
+
+{% block body_id %}splash{% endblock %}
+
+{% block content %}
+<div class="container">
+#  {% include 'auth/_login.html' %}
+</div>
+{% endblock %}
+
+{% block js %}
+{% include "horizon/_scripts.html" %}
+<script type="text/javascript">
+$("#nav-console").attr('class', 'active')
+</script>
+{% endblock %}
