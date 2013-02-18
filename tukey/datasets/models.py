@@ -1,10 +1,13 @@
 from django.db import models
 
 class DataSet(models.Model):
-	#the ark_key should probably be automatically created based on prefix/num, possibly a trigger? for now, managed in the code.
-    ark_key = models.CharField(max_length=500, primary_key=True)
+    #since we're using postgres it would be nice to use the uuid field, but for now just make it a char field
+    #for the public data, going to use the slug as the key, but also going to create a uuid for future use
+    slug = models.SlugField(max_length=200, primary_key=True)
+    #every data set has to have a title
+    title = models.CharField(max_length=200)
+    key = models.CharField(max_length=36)
     prefix = models.CharField(max_length=10)
-    num = models.IntegerField()
 
 class Key(models.Model):
     key_name = models.CharField(max_length=1000, primary_key=True)

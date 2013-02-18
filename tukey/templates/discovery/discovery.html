@@ -1,0 +1,30 @@
+{% extends "base_web.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Choose Your Provider" %}{% endblock %}
+
+{% block main %}
+
+
+    {% block content %}
+    <div class="container">
+        <div id="idpSelect"></div>
+    </div>
+ 
+    {% endblock %}
+ 
+    {% block js %}
+    {% include "horizon/_scripts.html" %}
+    <script type="text/javascript">
+    $("#nav-console").attr('class', 'active')
+    </script>
+ 
+ 
+    <!-- Load languages scripts -->
+    <link rel="stylesheet" type="text/css" href="/demo/shibboleth-ds/idpselect.css">
+    <script src="idpselect_config.js" type="text/javascript" language="javascript"></script>
+    <script src="idpselect.js" type="text/javascript" language="javascript"></script>
+    {% endblock %}
+{% endblock %}
+
+

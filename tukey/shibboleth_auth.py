@@ -1,16 +1,10 @@
-import functools
 import logging
 
 from .models import UnregisteredUser
-from django import shortcuts
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.signals import user_logged_in
-from django.utils.decorators import available_attrs
-from django.utils.translation import ugettext as _
-from horizon import decorators
-from horizon.exceptions import NotAuthorized, NotAuthenticated
 from keystoneclient import exceptions as keystone_exceptions
 from openstack_auth import utils
 from openstack_auth.backend import KeystoneBackend
@@ -27,6 +21,11 @@ def get_user(request):
         backend.request = request
         user = backend.get_user(user_id) or AnonymousUser()
         LOG.debug("user %s", user)
+
+        request.session.set_expiry(settings.SESSION_TIMEOUT)
+
+        LOG.debug("setting expiry to :%s", settings.SESSION_TIMEOUT)
+
     except KeyError:
         shib_header = None
         for possible_header in settings.SHIB_HEADERS:
@@ -77,6 +76,7 @@ def login(request, user):
 
     if hasattr(request, 'user'):
         request.user = user
+
     user_logged_in.send(sender=user.__class__, request=request, user=user)
 
 
@@ -98,16 +98,9 @@ def patch_openstack_middleware_get_user():
     openid_views.login_complete = new_login_complete
 
 
-    from horizon.usage import base
+    from openstack_dashboard.usage import base
     base.GlobalUsage.show_terminated = True
 
     from create_patches import patch
     patch()
-
-    from horizon.dashboards.nova.dashboard import BasePanels
-    BasePanels.panels = panels = ('overview',
-              'instances',
-              #'volumes',
-              'images_and_snapshots',
-              'access_and_security')
 

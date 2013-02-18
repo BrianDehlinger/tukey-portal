@@ -11,27 +11,31 @@
 
 
 {% block modal-body %}
-    <div>
-      <a href="/Shibboleth.sso/Login?target={% url horizon:nova:overview:index %}">
-         {% trans "Sign in with " %}
-         <img src="../../static/dashboard/img/shibboleth.jpg" alt="Shibboleth"/>
-      </a>
-    {% if request.GET.shib %}
-	<br />
-	{% trans "To sign out of your Shibboleth ID provider please close all open browser windows." %}
-    {% endif %}
-    </div>
 
-    <br />
 
-    <div>
-      {% if next %}<a href="{% url openid:openid-login %}?next={{ next }}">
-      {% else %}<a href="{% url openid:openid-login %}?next={% url horizon:nova:overview:index %}">
-      {% endif %}
-         {% trans "Sign in with " %}
-	<img src="../../static/dashboard/img/openid.png" alt="OpenID"/>
-      </a>
-    </div>
+     <div>
+       {% if next %}<a href="/Shibboleth.sso/Login?target={{ next }}">
+       {% else %}<a href="/Shibboleth.sso/Login?target={% url horizon:project:overview:index %}">
+       {% endif %}
+          {% trans "Sign in with " %}
+          <img src="../../static/dashboard/img/shibboleth.jpg" alt="Shibboleth"/>
+       </a>
+     {% if request.GET.shib %}
+     <br />
+     {% trans "To sign out of your Shibboleth ID provider please close all open browser windows." %}
+     {% endif %}
+     </div>
+
+     <br />
+
+     <div>
+       {% if next %}<a href="{% url openid:openid-login %}?next={{ next }}">
+       {% else %}<a href="{% url openid:openid-login %}?next={% url horizon:project:overview:index %}">
+       {% endif %}
+          {% trans "Sign in with " %}
+     <img src="../../static/dashboard/img/openid.png" alt="OpenID"/>
+       </a>
+     </div>
 
   <!--
   <fieldset>
@@ -42,7 +46,4 @@
 {% endblock %}
 
 {% block modal-footer %}
-<!--
-  <button type="submit" class="btn btn-primary pull-right">{% trans "Sign In" %}</button>
--->
 {% endblock %}

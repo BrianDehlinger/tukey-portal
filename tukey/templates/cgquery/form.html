@@ -1,0 +1,16 @@
+{% extends "base_web.html" %}
+
+{% block header %}
+    <h1>CGQuery Query Builder</h1>
+{% endblock %}
+
+
+{% block main %}
+    <h1>CGQuery Query Builder</h1>
+    <form action="" method="post" class="form-horizontal"> {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Query" />
+    </form>
+{% endblock %}
+
+

@@ -64,4 +64,7 @@ def active_clouds(user):
     mc = memcache.Client([settings.AUTH_MEMCACHED], debug=0)
     creds = mc.get(str(user.token.token['id']))
 
-    return [key for key in creds.keys() if key not in others]
+    if creds is not None:
+        return [key for key in creds.keys() if key not in others]
+    else:
+        return []

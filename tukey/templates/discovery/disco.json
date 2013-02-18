@@ -1,0 +1,35 @@
+[{
+ "entityID": "urn:mace:incommon:uchicago.edu",
+ "DisplayNames": [
+  {
+  "value": "University of Chicago",
+  "lang": "en"
+  }
+ ],
+ "Descriptions": [
+  {
+  "value": "The University of Chicago Web Single Sign-On servce",
+  "lang": "en"
+  }
+ ],
+ "Logos": [
+  {
+  "value": "https://shibboleth2.uchicago.edu/idp/shib_img/idplogo.png",
+  "height": "83",
+  "width": "350",
+  "lang": "en"
+  }
+ ]
+},
+
+{
+"entityID": "https://citdecadssoweb.cit.nih.gov/siteminderagent/forms/nihlogin-dev.fcc?TYPE=33554433&REALMOID=06-629fb8b4-cae1-44ad-be76-819709b7dd3b&GUID=&SMAUTHREASON=0&METHOD=GET&SMAGENTNAME=-SM-vwjBoKz%2bDtgutLHIwZCFI0BgBzxIOW9tpcRPkMINs9Or2o2wZhI0WI8Gqa51IVMl&TARGET=-SM-HTTPS%3a%2f%2fcitdecadssoweb%2ecit%2enih%2egov%2faffwebservices%2fredirectjsp%2fredirect%2ejsp%3fSPID%3dhttps%3a%2f%2fbionimbus--pdc%2eopensciencedatacloud%2eorg%2fshibboleth%26SMPORTALURL%3dhttps-%3A-%2F-%2Fcitdecadssoweb%2ecit%2enih%2egov-%3A443-%2Faffwebservices-%2Fpublic-%2Fsaml2sso",
+"DisplayNames": [{ "value": "NIH Login (Dev)", "lang": "en"}],
+ "Logos": [
+  {
+  "value": "https://citdecadssoweb.cit.nih.gov/siteminderagent/forms/images/footerlogo-nih2.gif",
+   "height": "83",
+    "width": "83",
+    "lang": "en"
+}]}
+]

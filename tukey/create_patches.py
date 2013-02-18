@@ -1,5 +1,5 @@
-import os
 import importlib
+import os
 import sys
 
 
@@ -40,8 +40,8 @@ def patch():
     local_dir = '/'.join(os.path.dirname(os.path.abspath(__file__)).split('/')[:-1]) + '/'
 
     my_dir = local_dir + 'tukey'
-    their_dir = local_dir + 'horizon'
-    target_dirs = ['api','dashboards']
+    their_dir = local_dir + 'openstack_dashboard'
+    target_dirs = ['api','dashboards', 'usage']
 
     target_dirs = ['/'.join([my_dir, target]) for target in target_dirs]
 

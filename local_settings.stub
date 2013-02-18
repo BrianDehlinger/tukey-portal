@@ -1,0 +1,130 @@
+import os
+
+from django.utils.translation import ugettext_lazy as _
+from settings import *
+
+DEBUG = False
+TEMPLATE_DEBUG = DEBUG
+USE_X_FORWARDED_HOST = True
+
+
+TUKEY_ROOT = os.path.abspath(os.path.join(ROOT_PATH, '..', 'tukey'))
+STATIC_ROOT = os.path.abspath(os.path.join(TUKEY_ROOT, 'static'))
+TEMPLATE_DIRS = ( os.path.abspath(os.path.join(TUKEY_ROOT, 'templates')), )
+
+#FORCE_SCRIPT_NAME = '/demo/'
+#STATIC_URL = '/demo/static/'
+
+TEMPLATE_CONTEXT_PROCESSORS += ( "tukey.context_processors.logout_url", )
+
+# Configure these for your outgoing email host
+# EMAIL_HOST = 'smtp.my-company.com'
+# EMAIL_PORT = 25
+# EMAIL_HOST_USER = 'djangomail'
+# EMAIL_HOST_PASSWORD = 'top-secret!'
+
+# For multiple regions uncomment this configuration, and add (endpoint, title).
+# AVAILABLE_REGIONS = [
+#     ('http://cluster1.example.com:5000/v2.0', 'cluster1'),
+#     ('http://cluster2.example.com:5000/v2.0', 'cluster2'),
+# ]
+
+OPENSTACK_HOST = "127.0.0.1"
+OPENSTACK_KEYSTONE_URL = "http://%s:5000/v2.0" % OPENSTACK_HOST
+OPENSTACK_KEYSTONE_DEFAULT_ROLE = "Member"
+
+OPENSTACK_KEYSTONE_BACKEND = {
+    'name': 'native',
+    'can_edit_user': True
+}
+
+API_RESULT_LIMIT = 1000
+API_RESULT_PAGE_SIZE = 10
+
+LOGGING = {
+        'version': 1,
+        # When set to True this will disable all logging except
+        # for loggers specified in this configuration dictionary. Note that
+        # if nothing is specified here and disable_existing_loggers is True,
+        # django.db.backends will still log unless it is disabled explicitly.
+        'disable_existing_loggers': False,
+        'handlers': {
+            'null': {
+                'level': 'DEBUG',
+                'class': 'django.utils.log.NullHandler',
+                },
+            'console': {
+                # Set the level to "DEBUG" for verbose output logging.
+                'level': 'INFO',
+                'class': 'logging.StreamHandler',
+                },
+            },
+        'loggers': {
+            # Logging from django.db.backends is VERY verbose, send to null
+            # by default.
+            'django.db.backends': {
+                'handlers': ['null'],
+                'propagate': False,
+                },
+            'horizon': {
+                'handlers': ['console'],
+                'propagate': False,
+            },
+            'openstack_dashboard': {
+                'handlers': ['console'],
+                'propagate': False,
+            },
+            'novaclient': {
+                'handlers': ['console'],
+               'propagate': False,
+            },
+            'keystoneclient': {
+                'handlers': ['console'],
+                'propagate': False,
+            },
+            'glanceclient': {
+                'handlers': ['console'],
+                'propagate': False,
+            },
+            'nose.plugins.manager': {
+                'handlers': ['console'],
+                'propagate': False,
+            }
+        }
+}
+
+INSTALLED_APPS = (
+    'compressor',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.humanize',
+    'django.contrib.messages',
+    'django.contrib.messages',
+    'django.contrib.sessions',
+    'django.contrib.sessions',
+    'django.contrib.staticfiles',
+    'django.contrib.staticfiles',
+    'horizon',
+    'openstack_dashboard',
+    'openstack_dashboard.dashboards.admin',
+    'openstack_dashboard.dashboards.project',
+    'openstack_dashboard.dashboards.settings',
+    'django_openid_auth',
+    'openstack_auth',
+    'tukey.content',
+    'tukey.customtags',
+    'tukey.datasets',
+    'tukey.files',
+    'tukey.keyservice',
+    'tukey.status',
+    'tukey.webforms',
+)
+
+AUTHENTICATION_BACKENDS = (
+     'django_openid_auth.auth.OpenIDBackend',
+     'openstack_auth.backend.KeystoneBackend',
+)
+
+OPENID_CREATE_USERS = True
+DISABLE_SECURITY_GROUPS_AND_IPS = True
+

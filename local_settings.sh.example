@@ -1,0 +1,13 @@
+
+# Fill these out use VAR_NAME="'value'"
+TIME_ZONE="'America/Chicago'"
+
+LOGOUT_URL="'?next=/Shibboleth.sso/Logout%3Freturn%3Dhttps%3A%2F%2Fwww.opensciencedatacloud.org' + LOGIN_URL + '%3Fshib%3Dtrue'"
+
+SITE_BRANDING="'Open Science Data Cloud'"
+
+DB_NAME="'osdcdb'"
+DB_USER="'osdc_user'"
+DB_PASSWORD="''"
+
+
