@@ -22,6 +22,19 @@ class LaunchImage(OldLaunchImage):
                             "source_id": self.table.get_object_id(datum)})
         return "?".join([base_url, params])
 
+class LaunchCluster(tables.LinkAction):
+    name = "launch_cluster"
+    verbose_name = _("Launch Cluster")
+    url = "horizon:project:instances:launch_cluster"
+    classes = ("btn-launch", "ajax-modal")
+
+    def get_link_url(self, datum):
+        base_url = reverse(self.url)
+        params = urlencode({"source_type": "image_id",
+                "cloud": get_cloud(datum),
+                            "source_id": self.table.get_object_id(datum)})
+        return "?".join([base_url, params])
+
 
 
 class ImagesTable(OldImagesTable):
@@ -33,5 +46,5 @@ class ImagesTable(OldImagesTable):
         status_columns = ["status"]
         verbose_name = _("Images")
         table_actions = (CreateImage, DeleteImage,)
-        row_actions = (LaunchImage, EditImage, DeleteImage,)
+        row_actions = (LaunchImage, LaunchCluster, EditImage, DeleteImage,)
         pagination_param = "image_marker"

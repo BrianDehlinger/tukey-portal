@@ -1,13 +1,62 @@
 from django import forms
+from django.conf import settings
+from tukey.cloud_attribute import cloud_details
 
-class CGQueryForm(forms.Form):
-    disease_abbr = forms.ChoiceField(
-        help_text="""The short disease name.""",
-        label="Disease Abbreviation",
-        required=False,
-        widget=forms.Select(attrs={'class':'switchable'}),
-        choices= [
-        ('', 'Any'),
+import pyelasticsearch
+
+class OsdcQueryForm(forms.Form):
+
+#    def __init__(self, data):
+#        super(OsdcQueryForm, self).__init__(data)
+#
+#        print self.fields.keys()
+#
+#        data_items = [(k,v) for k, v in data.items() if k not in
+#            self.fields.keys() + ['csrfmiddlewaretoken']]
+#
+#        data_items = sorted(data_items, key=lambda x: int(x[0].split('_')[0]))
+#        print data_items
+#
+#        for k, v in data_items:
+#            #if k.startswith('Q') and k not in self.fields.keys():
+#            field_type = '_'.join(k.split('_')[1:])
+#            self.fields[k] = QueryFields.query_fields[field_type](v)
+#
+
+    def set_cloud(self, user):
+        clouds = cloud_details(user).items()
+        print "where are the clouds? ", clouds
+        self.base_fields['cloud'].choices = [(k, v) for k, v in clouds
+            if k in settings.CLOUD_FUNCTIONS['osdcquery']]
+
+        self.fields['cloud'].choices = [(k, v) for k, v in clouds
+            if k in settings.CLOUD_FUNCTIONS['osdcquery']]
+
+    query_name = forms.CharField(label="Query Name", required=True)
+
+    query_top_dir = forms.CharField(label="Link Directory", required=True, initial="/tmp")
+
+    generated_query = forms.CharField(
+        label="Generated Query",
+        widget=forms.TextInput(attrs={'class':'span9', 'id': 'generated_query'}))
+
+    cloud = forms.ChoiceField(
+        label="Cloud",
+        widget=forms.Select(attrs={'class':'switchable'}))
+
+
+class QueryFields():
+
+    def __iter__(self):
+        return iter(sorted(QueryFields.query_fields, key=lambda dic: dic["label"]))
+
+    query_fields = []
+
+    query_fields.append({"name": "disease_abbr",
+        "help_text": """The short disease name.""",
+        "label": "Disease Abbreviation",
+        "values": [
+        #('', 'Any'),
         ('ACC','Adrenocortical carcinoma'),
         ('BLCA','Bladder Urothelial Carcinoma'),
         ('BRCA','Breast invasive carcinoma'),
@@ -41,48 +90,42 @@ class CGQueryForm(forms.Form):
         ('THCA','Thyroid carcinoma'),
         ('UCEC','Uterine Corpus Endometrioid Carcinoma'),
         ('UCS','Uterine Carcinosarcoma')
-    ])
-        
-    participant_id = forms.CharField(
-        help_text="""The ID of the human participant providing the sample. 
+    ]})
+
+    query_fields.append({"name": "participant_id",
+        "help_text": """The ID of the human participant providing the sample.
             Previously represented by the TCGA 3 part barcode (e.g. TCGA- AB-2802).
             For TCGA this will be a participant UUID provided by the DCC. """,
-        required=False,
-        label="Participant ID")
-               
-    sample_id = forms.CharField(
-        help_text="""The ID for the root sample from which
+        "label": "Participant ID"})
+
+    query_fields.append({"name": "sample_id",
+        "help_text": """The ID for the root sample from which
             the aliquot was derived. Previously
-            represented by the TCGA 5 part barcode 
+            represented by the TCGA 5 part barcode
             (e.g. TCGA- AB-2802-03C-01W ).
             For TCGA this will be a sample UUID provided by the DCC""",
-        required=False,
-        label="Sample ID")
+        "label": "Sample ID"})
 
-    analyte_code = forms.ChoiceField(
-        help_text="""The type of analyte (e.g. DNA,RNA, etc.).""",
-        required=False,
-        label="Analyte Code",
-        widget=forms.Select(attrs={'class':'switchable'}),
-        choices= [
-        ('', 'Any'),
+    query_fields.append({"name": "analyte_code",
+        "help_text": """The type of analyte (e.g. DNA,RNA, etc.).""",
+        "label": "Analyte Code",
+        "values": [
+        #('', 'Any'),
         ('D',' DNA'),
         ('G',' Whole Genome Amplification (WGA) produced using GenomePlex (Rubicon) DNA'),
         ('H',' mirVana RNA (Allprep DNA) produced by hybrid protocol'),
         ('R',' RNA'),
         ('T',' Total RNA'),
         ('W',' Whole Genome Amplification (WGA) produced using Repli-G (Qiagen) DNA'),
-        ('X',' Whole Genome Amplification (WGA) produced using Repli-G X (Qiagen) DNA (2nd Reaction)')])
+        ('X',' Whole Genome Amplification (WGA) produced using Repli-G X (Qiagen) DNA (2nd Reaction)')]})
 
-    
-    sample_type = forms.ChoiceField(
-        help_text="""The type of sample (e.g. Blood Derived Normal, 
+
+    query_fields.append({"name": "sample_type",
+        "help_text": """The type of sample (e.g. Blood Derived Normal,
             Primary solid Tumor, etc.).""",
-        required=False,
-        label="Sample Type",
-        widget=forms.Select(attrs={'class':'switchable'}),
-        choices= [
-        ('', 'Any'),
+        "label": "Sample Type",
+        "values": [
+        #('', 'Any'),
         ('01','Primary solid Tumor TP'),
         ('02','Recurrent Solid Tumor TR'),
         ('03','Primary Blood Derived Cancer - Peripheral Blood TB'),
@@ -101,16 +144,14 @@ class CGQueryForm(forms.Form):
         ('40','Recurrent Blood Derived Cancer - Peripheral Blood TRB'),
         ('50','Cell Lines CELL'),
         ('60','Primary Xenograft Tissue XP'),
-        ('61','Cell Line Derived Xenograft Tissue XCL')])
+        ('61','Cell Line Derived Xenograft Tissue XCL')]})
 
-    
-    tss_id = forms.ChoiceField(
-        help_text="""The Tissue Source Site""",
-        required=False,
-        label="Tissue Source Site",
-        widget=forms.Select(attrs={'class':'switchable'}),
-        choices= [
-('', 'Any'),
+
+    query_fields.append({"name": "tss_id",
+        "help_text": """The Tissue Source Site""",
+        "label": "Tissue Source Site",
+        "values": [
+#('', 'Any'),
 ('1','International Genomics Consortium Ovarian serous cystadenocarcinoma'),
 ('2','MD Anderson Cancer Center Glioblastoma multiforme'),
 ('3','Lung Cancer Tissue Bank of CALGB Lung squamous cell carcinoma'),
@@ -720,56 +761,46 @@ class CGQueryForm(forms.Form):
 ('PV','Maine Medical Center Head and Neck squamous cell carcinoma'),
 ('PW','Maine Medical Center Cervical squamous cell carcinoma and endocervical adenocarcinoma'),
 ('PX','Maine Medical Center Kidney renal papillary cell carcinoma'),
-('PY','Maine Medical Center Liver hepatocellular carcinoma')])
+('PY','Maine Medical Center Liver hepatocellular carcinoma')]})
 
 
 
-    analysis_id = forms.CharField(
-        help_text="""This is the primary Globally unique ID (UUID) associated
+    query_fields.append({"name": "analysis_id",
+        "help_text": """This is the primary Globally unique ID (UUID) associated
             with a collection of sequencing data files and their metadata.""",
-        required=False,
-        label="Analysis ID")
+        "label": "Analysis ID"})
 
-    analysis_id = forms.CharField(
-        help_text="""Legacy SRZnnnnnn analysis accession # for data migrated from SRA.""",
-        required=False,
-        label="Analysis Accession")
+    query_fields.append({"name": "analysis_id",
+        "help_text": """Legacy SRZnnnnnn analysis accession # for data migrated from SRA.""",
+        "label": "Analysis Accession"})
 
-    state  = forms.CharField(
-        help_text="""Determines if the Submission is still being processed (uploading), is 
+    query_fields.append({"name": "state",
+        "help_text": """Determines if the Submission is still being processed (uploading), is
             live, or has been suppressed. Users can only download data with state=live.""",
-        required=False,
-        label="State")
+        "label": "State"})
 
-    study  = forms.CharField(
-        help_text="""The study for which the data was generated. This value is used to 
+    query_fields.append({"name": "study",
+        "help_text": """The study for which the data was generated. This value is used to
             determine which users can download the data (e.g. phs000178).""",
-        required=False,
-        label="Study")
+        "label": "Study"})
 
-    aliquot_id = forms.CharField(
-        help_text="""Globally unique ID for the aliquot used to generate this analysis.""",
-        required=False,
-        label="Aliquot ID")
+    query_fields.append({"name": "aliquot_id",
+        "help_text": """Globally unique ID for the aliquot used to generate this analysis.""",
+        "label": "Aliquot ID"})
 
-    sample_accession = forms.CharField(
-        help_text="""Legacy sample accession # for data migrated from SRA.""",
-        required=False,
-        label="Sample Accession")
+    query_fields.append({"name": "sample_accession",
+        "help_text": """Legacy sample accession # for data migrated from SRA.""",
+        "label": "Sample Accession"})
 
-    last_modified = forms.DateTimeField(
-        widget=forms.SplitDateTimeWidget,
-        help_text="""Date the object was last modified.""",
-        required=False,
-        label="Last Modified")
+    query_fields.append({"name": "last_modified",
+        "help_text": """Date the object was last modified.""",
+        "label": "Last Modified"})
 
-    center_name = forms.ChoiceField(
-        help_text="""Short names defined by the project (e.g. BI, BCM, UNC-LCCC).""",
-        label="Center Name",
-        required=False,
-        widget=forms.Select(attrs={'class':'switchable'}),
-        choices= [
-        ('', 'Any'),
+    query_fields.append({"name": "center_name",
+        "help_text": """Short names defined by the project (e.g. BI, BCM, UNC-LCCC).""",
+        "label": "Center Name",
+        "values": [
+        #('', 'Any'),
         ('BI','Broad Institute of MIT and Harvard'),
         ('HMS','Harvard Medical School'),
         ('LBL','Lawrence Berkeley National Laboratory'),
@@ -800,32 +831,27 @@ class CGQueryForm(forms.Form):
         ('JHU','The Johns Hopkins University'),
         ('PNNL','Pacific Northwest National Lab'),
         ('WUSM','Washington University School of Medicine'),
-        ('BCGSC','Canada\'s Michael Smith Genome Sciences Centre')])
-    
-    alias = forms.CharField(
-        help_text="""Name of the analysis object as defined by the submitting center.""",
-        required=False,
-        label="Alias")
+        ('BCGSC','Canada\'s Michael Smith Genome Sciences Centre')]})
 
-    Title = forms.CharField(
-        help_text="""Title of the analysis object as defined by the submitting center.""", 
-        required=False,
-        label="Title")
+    query_fields.append({"name": "alias",
+        "help_text": """Name of the analysis object as defined by the submitting center.""",
+        "label": "Alias"})
 
-    analysis_type = forms.CharField(
-        help_text="""The type of analysis.  Uses the values from SRA 1.4 schema.
+    query_fields.append({"name": "title",
+        "help_text": """Title of the analysis object as defined by the submitting center.""",
+        "label": "Title"})
+
+    query_fields.append({"name": "analysis_type",
+        "help_text": """The type of analysis.  Uses the values from SRA 1.4 schema.
             For TCGA, this will be REFERENCE_ALIGNMENT """,
-        required=False,
-        label="Analysis Type")
+        "label": "Analysis Type"})
 
 
-    library_strategy = forms.ChoiceField(
-        help_text="""The sequencing technique used.  Values are defined by the SRA.""",
-        label="Library Strategy",
-        required=False,
-        widget=forms.Select(attrs={'class':'switchable'}),
-        choices= [
-        ('', 'Any'),
+    query_fields.append({"name": "library_strategy",
+        "help_text": """The sequencing technique used.  Values are defined by the SRA.""",
+        "label": "Library Strategy",
+        "values": [
+        #('', 'Any'),
         ('AMPLICON','AMPLICON'),
         ('Bisulfite-Seq','Bisulfite-Seq'),
         ('ChIP-Seq','ChIP-Seq'),
@@ -847,31 +873,31 @@ class CGQueryForm(forms.Form):
         ('WCS','WCS'),
         ('WGS','WGS'),
         ('W XS','W XS'),
-        ('OTHER','OTHER')])
-        
-    platform = forms.ChoiceField(
-        help_text="""The machine used to generate the sequence data.""",
-        label="Platform",
-        required=False,
-        widget=forms.Select(attrs={'class':'switchable'}),
-        choices= [
-        ('', 'Any'),
+        ('OTHER','OTHER')]})
+
+    query_fields.append({"name": "platform",
+        "help_text": """The machine used to generate the sequence data.""",
+        "label": "Platform",
+        "values": [
+        #('', 'Any'),
 ('LS454','LS454'),
 ('ILLUMINA','ILLUMINA'),
 ('HELICOS','HELICOS'),
 ('ABI_SOLID','ABI_SOLID'),
 ('COMPLETE_GENOMICS','COMPLETE_GENOMICS'),
 ('PACBIO_SMRT','PACBIO_SMRT'),
-('ION_TORRENT','ION_TORRENT')])
+('ION_TORRENT','ION_TORRENT')]})
 
-    filename = forms.CharField(
-        help_text="""Name of a data file associated with an analysis.""",
-        required=False,
-        label="Filename")
+    query_fields.append({"name": "filename",
+        "help_text": """Name of a data file associated with an analysis.""",
+        "label": "Filename"})
 
-    xml_text = forms.CharField(
-        help_text="""Free form search from the original submission XML documents.""",
-        required=False,
-        label="Search XML Text")
+    query_fields.append({"name": "xml_text",
+        "help_text": """Free form search from the original submission XML documents.""",
+        "label": "Search XML Text"})
 
-
+#    query_fields.append({"name": "cloud",
+##        "help_text": "The Cloud to Link files on.",
+#        required=True,
+#        "label": "Cloud",
+#        widget=forms.Select(attrs={'class':'switchable'}))

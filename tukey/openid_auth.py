@@ -22,6 +22,14 @@ from openid.consumer.consumer import SUCCESS
 from openid.extensions import pape
 from openstack_auth.backend import KeystoneBackend
 from openstack_auth.exceptions import KeystoneAuthException
+from django import forms
+import requests
+from django.utils.http import urlencode
+from django.utils.functional import curry
+
+
+from django import shortcuts
+from openstack_dashboard.views import get_user_home
 
 LOG = logging.getLogger(__name__)
 
@@ -117,16 +125,82 @@ class OpenIDKeystoneBackend(KeystoneBackend):
             teams_response)
 
 
+class ShibbolethOpenIDLoginForm(OpenIDLoginForm):
+
+#    entityid = forms.ChoiceField(label=_("Institution or Organization"),
+#        choices=[(org["entityID"], org["DisplayNames"][0]["value"]
+#            if "DisplayNames" in org else org["entityID"]) for org in
+#            requests.get(
+#                "https://www.opensciencedatacloud.org/Shibboleth.sso/DiscoFeed"
+#                #request.build_absolute_uri("/Shibboleth.sso/DiscoFeed")
+#            ).json()
+##                if org["entityID"] in [
+##                    "urn:mace:incommon:lbl.gov",
+##                    "urn:mace:incommon:uchicago.edu"
+##                ]
+#         ], required=False)
+
+    entityid = forms.ChoiceField(label="Institution or Organization",
+        choices=sorted([(entity, name) for entity, name in
+            requests.get(
+                "https://www.opensciencedatacloud.org/misc/idps.json"
+            ).json().items()
+                #if entity in [
+                #    "urn:mace:incommon:lbl.gov",
+                #    "urn:mace:incommon:uchicago.edu"
+                #]
+         ], key=lambda tup: tup[1]), required=False)
+	
+
+    def __init__(self, request, *args, **kwargs):
+        super(ShibbolethOpenIDLoginForm, self).__init__(*args, **kwargs)
+        print kwargs
+        if "entityid_cookie" in request.COOKIES:
+            print "SETTING the entitty id to ", request.COOKIES["entityid_cookie"]
+            self.fields["entityid"].initial = request.COOKIES["entityid_cookie"]
+
+
 def login_begin(request, template_name='openid/login.html',
                 login_complete_view='openid:openid-complete',
-                form_class=OpenIDLoginForm,
+                form_class=ShibbolethOpenIDLoginForm,
                 render_failure=default_render_failure,
                 redirect_field_name=REDIRECT_FIELD_NAME):
 
+
+#    req = requests.get("https://www.opensciencedatacloud.org/Shibboleth.sso/DiscoFeed")
+#    #req = requests.get(request.build_absolute_uri("/Shibboleth.sso/DiscoFeed"))
+#
+#    disco_feed = req.json()
+#
+#    print disco_feed
+#
+#    idps = ["urn:mace:incommon:lbl.gov", "urn:mace:incommon:uchicago.edu"]
+#
+#    idp_info = [(org["entityID"], org["DisplayNames"][0]["value"]) for org in
+#        disco_feed if org["entityID"] in idps]
+#
+#    form_class.entityid.choices = idp_info
+
     LOG.debug('new login begin')
+
+    if request.user.is_authenticated():
+        return shortcuts.redirect(get_user_home(request.user))
+
+    if "openid_identifier" not in request.POST and "entityid" in request.POST:
+        response = HttpResponseRedirect(
+            "https://www.opensciencedatacloud.org/Shibboleth.sso/Login?%s" % urlencode(
+                {"entityID": request.POST["entityid"],
+                    "target": request.POST.get("next", default="/project/")}
+            )
+        )
+        response.set_cookie("entityid_cookie", request.POST["entityid"])
+
+        return response
+    
     return old_login_begin(request, 
         settings.ROOT_PATH + '/../tukey/templates/osdc/openid_login.html',
-        login_complete_view, form_class, render_failure, redirect_field_name)
+        login_complete_view, curry(form_class, request), render_failure,
+            redirect_field_name)
 
 
 
@@ -183,3 +257,4 @@ def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME,
 #        assert False, (
 #            "Unknown OpenID response type: %r" % openid_response.status)
 #
+

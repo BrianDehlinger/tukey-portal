@@ -1,18 +1,23 @@
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
+
 
 from openstack_dashboard import api
 from horizon import exceptions
+from horizon import workflows
 
 from openstack_dashboard.dashboards.project.instances.views import DetailView as OldDetailView
 from openstack_dashboard.dashboards.project.instances.views import IndexView as OldIndexView
 
-from .tables import InstancesTable
+
 
 class IndexView(OldIndexView):
+    from tukey.dashboards.project.instances.tables import InstancesTable
     table_class = InstancesTable
     template_name = 'project/instances/index.html'
 
+from .workflows import LaunchCluster
 
 class DetailView(OldDetailView):
 
@@ -42,3 +47,14 @@ class DetailView(OldDetailView):
                                     redirect=redirect)
             self._instance = instance
         return self._instance
+
+
+class LaunchClusterView(workflows.WorkflowView):
+    workflow_class = LaunchCluster
+    template_name = settings.ROOT_PATH + "/../tukey/templates/project/instances/launch_cluster.html"
+
+    def get_initial(self):
+        initial = super(LaunchClusterView, self).get_initial()
+        initial['project_id'] = self.request.user.tenant_id
+        initial['user_id'] = self.request.user.id
+        return initial

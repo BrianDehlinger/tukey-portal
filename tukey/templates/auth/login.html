@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 {% load i18n %}
-
+{% block header %} <meta http-equiv="refresh" content="0; url=/openid/login" /> {% endblock %}
 {% block title %}{% trans "Login" %}{% endblock %}
-
 {% block body_id %}splash{% endblock %}
 
 {% block content %}
 <div class="container">
-#  {% include 'auth/_login.html' %}
+#  {% include 'auth/shibboleth_openid.html' %}
 </div>
 {% endblock %}
 

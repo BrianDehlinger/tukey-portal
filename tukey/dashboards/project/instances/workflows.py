@@ -21,6 +21,40 @@ from openstack_dashboard.dashboards.project.instances.workflows import(
     SetInstanceDetailsAction)
 
 
+class SetClusterDetailsAction(SetInstanceDetailsAction):
+    SOURCE_TYPE_CHOICES = (
+        ("image_id", _("Image")),
+        ("instance_snapshot_id", _("Snapshot")),
+    )
+    source_type = forms.ChoiceField(label=_("Compute Node Source"),
+                                    choices=SOURCE_TYPE_CHOICES)
+    image_id = forms.ChoiceField(label=_("Image"), required=False)
+    instance_snapshot_id = forms.ChoiceField(label=_("Instance Snapshot"),
+                                             required=False)
+    name = forms.CharField(initial='none', widget=forms.HiddenInput())
+    flavor = forms.ChoiceField(label=_("Flavor"),
+                               help_text=_("Size of compute nodes to launch."))
+    count = forms.IntegerField(label=_("Compute Node Count"),
+                               min_value=1,
+                               initial=1,
+                               help_text=_("Number of compute nodes to launch."))
+
+    cloud = forms.CharField(max_length=80, label=_("Cloud Name"))
+    cloud.widget.attrs['readonly'] = True
+    #name.widget.attrs['visible'] = False
+
+
+    class Meta:
+        name = _("Details")
+        help_text_template = (settings.ROOT_PATH + "/../tukey/templates/project"
+                            "/instances/_launch_cluster_details_help.html")
+
+class SetClusterDetails(SetInstanceDetails):
+    action_class = SetClusterDetailsAction
+    contributes = ("source_type", "source_id", "count", "flavor", "cloud")
+
+
+
 class LaunchInstance(OldLaunchInstance):
 
     default_steps = (SelectProjectUser,
@@ -87,6 +121,7 @@ def populate_image_id_choices(self, request, context):
         if cloud.lower() not in settings.CLOUD_FUNCTIONS['launch_multiple']:
             self.fields['count'].widget.attrs['readonly'] = True
 
+
         
         if cloud.lower() not in settings.CLOUD_FUNCTIONS['namable_servers']:
             self.fields['name'].widget.attrs['readonly'] = True
@@ -132,11 +167,15 @@ SetAccessControls.depends_on = ("project_id", "user_id", "cloud")
 
 
 def populate_keypair_choices(self, request, context):
+
+
     try:
         keypairs = api.nova.keypair_list(request)
         if 'cloud' in request.GET:
             context['cloud'] = request.GET['cloud']
         if 'cloud' in context:
+            if context['cloud'].lower() not in settings.CLOUD_FUNCTIONS['instance_keys']:
+                self.fields['keypair'].widget = forms.HiddenInput()
             cloud = context['cloud']
             keypair_list = [(kp.name, kp.name) for kp in keypairs
             if get_cloud(kp) == cloud]
@@ -153,3 +192,64 @@ def populate_keypair_choices(self, request, context):
     return keypair_list
     
 SetAccessControlsAction.populate_keypair_choices = populate_keypair_choices
+
+
+class LaunchCluster(workflows.Workflow):
+    slug = "launch_cluster"
+    name = _("Launch Cluster")
+    finalize_button_name = _("Launch Cluster")
+    success_message = _('Launched cluster with %(count)s.')
+    failure_message = _('Unable to launch %(count)s.')
+    success_url = "horizon:project:instances:index"
+    default_steps = (SelectProjectUser,
+                     SetClusterDetails,
+                     SetAccessControls,
+                     #SetNetwork,
+                     #VolumeOptions,
+                     PostCreationStep)
+
+    def format_status_message(self, message):
+        name = self.context.get('name', 'unknown instance')
+        count = self.context.get('count', 1)
+        if int(count) > 1:
+            return message % {"count": _("%s nodes") % count}
+        else:
+            return message % {"count": _("1 compute node")}
+
+    def handle(self, request, context):
+        custom_script = context.get('customization_script', '')
+
+        # Determine volume mapping options
+        if context.get('volume_type', None):
+            if(context['delete_on_terminate']):
+                del_on_terminate = 1
+            else:
+                del_on_terminate = 0
+            mapping_opts = ("%s::%s"
+                            % (context['volume_id'], del_on_terminate))
+            dev_mapping = {context['device_name']: mapping_opts}
+        else:
+            dev_mapping = None
+
+        netids = context.get('network_id', None)
+        if netids:
+            nics = [{"net-id": netid, "v4-fixed-ip": ""}
+                    for netid in netids]
+        else:
+            nics = None
+        try:
+            api.nova.server_create(request,
+                                   "cluster" + context['cloud'].lower() + "-none",
+                                   context['source_id'],
+                                   context['flavor'],
+                                   context['keypair_id'],
+                                   normalize_newlines(custom_script),
+                                   context['security_group_ids'],
+                                   dev_mapping,
+                                   nics=nics,
+                                   instance_count=int(context['count']))
+            return True
+        except:
+            exceptions.handle(request)
+            return False
+

@@ -1,0 +1,46 @@
+"",Index,Index,0,logo_sm.png,Index Logo,"
+<header class=""jumbotron"">
+  <img src=""/static/OSDC_RGB_Horiz_sm.jpg"">
+  <p class=""lead"">Cloud services for the scientific community</p>
+</header>
+
+<div class=""container"">
+<div class=""row"">
+  <div class=""span4"">
+    <h3 class=""sub-topic"">What is the Bionimbus PDC?</h3>
+<p>The Bionimbus Protected Data Cloud (PDC) is a collaboration between
+  the Open Science Data Cloud (<a href="https://www.opensciencedatacloud.org">OSDC</a>) and the IGSB (<a href="http://www.igsb.org">IGSB</a>), 
+ the Center for Research Informatics (<a href="http://cri.uchicago.edu">CRI</a>), the Institute for
+  Translational Medicine (<a href="http://itm.uchicago.edu">ITM</a>), and the <a href="http://cancer.uchicago.edu">UCCCC</a>
+  at the University of Chicago. The
+  PDC allows users authorized by NIH to compute over protected
+  data in a secure compliant fashion.</p>
+  </div>
+
+  <div class=""span4"">
+    <h3 class=""sub-topic"">How can I get involved?</h3>
+    <p>
+<ul>
+<li>Apply for an Bionimbus PDC account and use the Bionimbus PDC to manage, analyze and
+share your data.</li>
+<li>Partner with us and add your own racks to the Bionimbus PDC (we will manage
+them for you).</li>
+<li>Help us develop the open source Bionimbus PDC software stack.</li>
+</ul>
+You can contact us at <a href=""mailto:bionimbus-pdc@opensciencedatacloud.org"">bionimbus-pdc@opensciencedatacloud.org.</a>
+    </p>
+  </div>
+
+  <div class=""span4"">
+    <h3 class=""sub-topic"">How do I get started?</h3>
+    <p>
+First, apply for an account. Once you have an account, you can take a
+look at the Bionimbus PDC instructions (under the support tab), login to the
+console, and get started.
+    </p>
+<a href=""/apply/pdc"" class=""btn btn-large btn-block btn-warning"">Apply for the PDC Now</a>
+<a href=""/console"" class=""btn btn-large btn-block btn-primary"">Login to the PDC Console</a>
+  </div>
+</div>
+</div>
+"

@@ -128,3 +128,46 @@ AUTHENTICATION_BACKENDS = (
 OPENID_CREATE_USERS = True
 DISABLE_SECURITY_GROUPS_AND_IPS = True
 
+
+APPLICATION_EMAIL = 'accounts@opencloudconsortium.org'
+APPLICATION_INVITE_EMAIL = 'accounts@opencloudconsortium.org'
+SUPPORT_EMAIL = 'support@opensciencedatacloud.org'
+
+SESSION_TIMEOUT = 300000
+
+STATUS_URL = "http://dashboard.bionimbus.opensciencedatacloud.org/state.json"
+#STATUS_URL = 'http://dashboard.opensciencedatacloud.org/state.json'
+#STATUS_URL = 'http://127.0.0.1:9999/state.json'
+
+STATUS = [
+#    ("Adler", {
+#        "dashboard": "OSDC Cloud2",
+#        "idprefix": "adler",
+#        "type": "cloud"
+#    }),
+#    ("Sullivan", {
+#        "dashboard": "OSDC-Sullivan",
+#        "idprefix": "sullivan",
+#        "type": "cloud"
+#    }),
+    ("Bionimbus PDC", {
+        "dashboard":"Bionimbus-PDC",
+        "idprefix":"blake",
+        "type": "cloud"
+    })#,
+#    ("OCC-Y", {
+#        "dashboard": "OCC-Y",
+#        "idprefix": "occ-y",
+#        "type": "map_reduce"
+#    }),
+#    ("OCC-LVOC", {
+#        "dashboard": "OCC-LVOC-HADOOP",
+#        "idprefix": "occ-lvoc",
+#        "type": "map_reduce"
+#    }),
+#    ("OCC-Root", {
+#        "dashboard": "OCC-Root",
+#        "idprefix": "occ-root",
+#        "type": "storage"})
+]
+

@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.conf import settings
-from tukey.webforms.forms import OSDCForm, OSDCInviteForm, OSDCSupportForm
+from tukey.webforms.forms import OSDCForm, OSDCInviteForm, OSDCSupportForm, PDCForm
 
-def build_message(form, is_invite):
+def build_message(form, is_invite=False, is_pdc=False):
     msg_list = []
     msg_list.append('From:\n')
     msg_list.append(form.cleaned_data['name'])
@@ -33,15 +33,18 @@ def build_message(form, is_invite):
                 msg_list.append('UChicago Bionimbus Cloud\n')
             elif item == 'matsu':
                 msg_list.append('Matsu Testbed\n')
-        
-    msg_list.append('\n\nProject Name:\n')
-    msg_list.append(form.cleaned_data['projectname'])
+    if not is_pdc:    
+        msg_list.append('\n\nProject Name:\n')
+        msg_list.append(form.cleaned_data['projectname'])
+        msg_list.append('\n\nProject Lead\n')
+        msg_list.append(form.cleaned_data['projectlead'])
+        msg_list.append('\n\nProject Lead E-mail:\n')
+        msg_list.append(form.cleaned_data['projectlead_email'])
+    else:
+        msg_list.append('\n\neRA Commons Username:\n')
+        msg_list.append(form.cleaned_data['eracommons'])
     msg_list.append('\n\nProject Description\n')
     msg_list.append(form.cleaned_data['projectdescr'])
-    msg_list.append('\n\nProject Lead\n')
-    msg_list.append(form.cleaned_data['projectlead'])
-    msg_list.append('\n\nProject Lead E-mail:\n')
-    msg_list.append(form.cleaned_data['projectlead_email'])
     msg_list.append('\n\nEstimated Resources:\n')
     msg_list.append(form.cleaned_data['resources'])
     return ''.join(msg_list)
@@ -51,7 +54,7 @@ def osdc_apply(request):
         form = OSDCForm(request.POST, request.FILES) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             subject = 'OSDC Account Request'
-            message = build_message(form, False)
+            message = build_message(form)
             sender = form.cleaned_data['email']
 
             recipients = [settings.APPLICATION_EMAIL]
@@ -84,7 +87,7 @@ def osdc_apply_invite(request):
         form = OSDCInviteForm(request.POST, request.FILES) # A form bound to the POST data                                                                                                                                                                
         if form.is_valid(): # All validation rules pass                                                                                                                                                                                             
             subject = 'OSDC Invited Account Request'
-            message = build_message(form, True)
+            message = build_message(form, is_invite=True)
             sender = form.cleaned_data['email']
 
             recipients = [settings.APPLICATION_INVITE_EMAIL]
@@ -127,4 +130,34 @@ def support(request):
 
 def support_thanks(request):
     return render(request, 'webforms/support_thanks.html')
+
+
+def osdc_apply_pdc(request):
+    if request.method == 'POST': # If the form has been submitted...
+        form = PDCForm(request.POST, request.FILES) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            subject = 'PDC Account Request'
+            message = build_message(form, is_pdc=True)
+            sender = form.cleaned_data['email']
+
+            recipients = [settings.APPLICATION_EMAIL]
+
+            #pubkey = request.FILES['pubkey']
+            from django.core.mail import EmailMessage
+#            send_mail(subject, message, sender, recipients)
+            email = EmailMessage(subject, message, sender, recipients)
+            #email.attach(pubkey.name, pubkey.read(), pubkey.content_type)
+            email.send()
+            
+            return HttpResponseRedirect('thanks/') # Redirect after POST
+    else:
+        form = PDCForm() # An unbound form
+
+    return render(request, 'webforms/osdc_apply_pdc.html', {
+        'form': form,
+    })
+
+def osdc_apply_pdc_thanks(request):
+    return render(request, 'webforms/apply_thanks.html')
+
 
